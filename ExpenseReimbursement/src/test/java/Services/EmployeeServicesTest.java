@@ -1,10 +1,17 @@
 package Services;
-import Services.EmployeeServices;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -13,11 +20,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import Beans.Department;
 import Beans.Employee;
+import Beans.Request;
 import DAOs.DepartmentDAO;
 import DAOs.EmployeeDAO;
-import Exceptions.AlreadyApprovedException;
+import DAOs.RequestDAO;
 import Exceptions.IncorrectCredentialsException;
 import Exceptions.UsernameAlreadyExistsException;
 
@@ -27,6 +34,8 @@ class EmployeeServicesTest {
 	private EmployeeDAO empDao;
 	@Mock
 	private DepartmentDAO deptDao;
+	@Mock
+	private RequestDAO reqDao;
 	
 //	private static Employee employed = new Employee();
 //	private static Employee manager = new Employee();
@@ -94,22 +103,86 @@ class EmployeeServicesTest {
             servedEmployee.register(newEmployee);
         });
     }
-    
     @Test
-    public void checkStatus() throws AlreadyApprovedException {
-        String requestStatus = "Approved";
-        List<Employee> engineers = (List<Employee>) empDao.getByStatus(requestStatus);
-        boolean onlyApprovedStatus = true;
-        for (Employee employed: engineers) {
-        	if (!(employed.getStatus().equals(requestStatus))) {
-        		onlyApprovedStatus = false;
-        		break;
-        	}
-        }
+    public void viewSubmittedRequests() {
+    	when(reqDao.getByStatus("Approved")).thenReturn(Collections.emptyList());
+    	List<Request> requests = servedEmployee.viewSubmittedRequest();
+    	assertNotNull(requests);
     }
-    @Test
-    public void submitRequest() {
-    	r
-    }
+   @Test
+   public void getBySubmittedDate() {
+	   String date = "2022-04-15";
+	   List<Request> mockRequests = new LinkedList<>();
+	   Request request = new Request();
+	   request.setSubmittedDate("2022-04-15");
+	   Request notRequest = new Request();
+	   notRequest.setSubmittedDate("2022-05-22");
+	   mockRequests.add(request);
+	   mockRequests.add(notRequest);
+	   when(reqDao.getAll()).thenReturn(mockRequests);
+	   
+	   List<Request> reqByDate = (List<Request>) servedEmployee.getSubmittedByDate(date);
+	   boolean onlyReqDates = true;
+	   for (Request reqs: reqByDate) {
+		   String reqDates = reqs.getSubmittedDate();
+		   if (!reqDates.contains(date)) {
+			   onlyReqDates = false;
+			   break;
+		   }
+	   }
+	   assertTrue(onlyReqDates);
+   }
   
+   @Test
+   public void submittedSuccessfully() throws Exception {
+	   Employee testEmployee = new Employee();
+	   Request testRequest = new Request();
+	   // reqDAo.getById: return testRequest
+	   when(reqDao.getById(testRequest.getRequestId())).thenReturn(testRequest);
+	   // empDao.getById: return testEmployee
+	   when(empDao.getById(testEmployee.getRequestId())).thenReturn(testEmployee);
+	   // reqDAo.update: do nothing
+	   // when reqDao update is called with any request object, do nothing
+	   doNothing().when(reqDao).update(any(Request.class));
+	   doNothing().when(empDao).update(any(Employee.class));
+	   doNothing().when(empDao).updateRequests(testEmployee.getRequestId(), testRequest.getRequestId());
+	   Employee result = servedEmployee.gradeRequests(testEmployee, testRequest);
+	   
+	   // employee now has request in list of requests, and the request in the list has its status updated
+	   // check with the "rejected" status in the employee list
+	   testRequest.setStatus("Rejected");
+	   List<Request> employeeReqs = result.getRequests();
+	   assertTrue(employeeReqs.contains(testRequest));
+	   // Mockito.verify allows you to make sure that a particular mock method was called 
+	   // (or that it was never called, or how many times, etc.)
+	   verify(reqDao, times(2)).update(any(Request.class));
+	   
+   }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 }

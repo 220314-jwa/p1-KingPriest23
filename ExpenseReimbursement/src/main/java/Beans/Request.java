@@ -3,10 +3,18 @@ package Beans;
 import java.util.Objects;
 
 public class Request {
-	private int requestId, submitterId, eventTypeId, statusId, cost; 
-	private String description, location, eventDate, submittedDate;
+	private int requestId, submitterId, cost; 
+	private String description, location, eventDate, submittedDate, status;
 	
 	public Request() {
+		requestId = 0;
+		submitterId = 0;
+		cost = 0;
+		description = "";
+		location = "";
+		eventDate = "";
+		submittedDate = "";
+		setStatus("Approved");
 		
 	}
 
@@ -24,22 +32,6 @@ public class Request {
 
 	public void setSubmitterId(int submitterId) {
 		this.submitterId = submitterId;
-	}
-
-	public int getEventTypeId() {
-		return eventTypeId;
-	}
-
-	public void setEventTypeId(int eventTypeId) {
-		this.eventTypeId = eventTypeId;
-	}
-
-	public int getStatusId() {
-		return statusId;
-	}
-
-	public void setStatusId(int statusId) {
-		this.statusId = statusId;
 	}
 
 	public int getCost() {
@@ -81,18 +73,26 @@ public class Request {
 	public void setSubmittedDate(String submittedDate) {
 		this.submittedDate = submittedDate;
 	}
+	
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
 	@Override
 	public String toString() {
-		return "Request [requestId=" + requestId + ", submitterId=" + submitterId + ", eventTypeId=" + eventTypeId
-				+ ", statusId=" + statusId + ", cost=" + cost + ", description=" + description + ", location="
-				+ location + ", eventDate=" + eventDate + ", submittedDate=" + submittedDate + "]";
+		return "Request [requestId=" + requestId + ", submitterId=" + submitterId + ", cost=" + cost + ", description="
+				+ description + ", location=" + location + ", eventDate=" + eventDate + ", submittedDate="
+				+ submittedDate + ", status=" + status + "]";
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cost, description, eventDate, eventTypeId, location, requestId, statusId, submittedDate,
-				submitterId);
+		return Objects.hash(cost, description, eventDate, location, requestId, status, submittedDate, submitterId);
 	}
 
 	@Override
@@ -105,11 +105,11 @@ public class Request {
 			return false;
 		Request other = (Request) obj;
 		return cost == other.cost && Objects.equals(description, other.description)
-				&& Objects.equals(eventDate, other.eventDate) && eventTypeId == other.eventTypeId
-				&& Objects.equals(location, other.location) && requestId == other.requestId
-				&& statusId == other.statusId && Objects.equals(submittedDate, other.submittedDate)
-				&& submitterId == other.submitterId;
+				&& Objects.equals(eventDate, other.eventDate) && Objects.equals(location, other.location)
+				&& requestId == other.requestId && Objects.equals(status, other.status)
+				&& Objects.equals(submittedDate, other.submittedDate) && submitterId == other.submitterId;
 	}
+
 	
 	
 }

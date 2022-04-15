@@ -1,11 +1,13 @@
-package Services;
-
-import Beans.Employee;
-import Exceptions.AlreadyApprovedException;
-import Exceptions.IncorrectCredentialsException;
-import Exceptions.UsernameAlreadyExistsException;
+                                                                                                                                                                                                                                                                                                                                                                                                               package Services;
 
 import java.util.List;
+
+import Beans.Employee;
+import Beans.Request;
+import Exceptions.IncorrectCredentialsException;
+import Exceptions.IncorrectSubmissionException;
+import Exceptions.NeedGradeException;
+import Exceptions.UsernameAlreadyExistsException;
 
 public interface EmployeeServices {
     // layout of all behaviors
@@ -14,10 +16,11 @@ public interface EmployeeServices {
     public Employee logIn(String username, String password) throws IncorrectCredentialsException;
     public Employee register(Employee newEmployee) throws UsernameAlreadyExistsException;
     public Employee getEmployeeById(int id);
-    public String getEmployee(String firstName, String lastName);
-    public Employee getApprovedEmployee(Employee deptId, Employee managerId) throws AlreadyApprovedException;
-    public Employee getStatus(String status) throws AlreadyApprovedException;
-   
+    
+    public List<Request> viewSubmittedRequest();
+    public Request getSubmittedByDate(String submittedDate);
+    
+    public Employee gradeRequests(Employee engineer, Request gradeRequests) throws NeedGradeException, Exception;
     
     
 }

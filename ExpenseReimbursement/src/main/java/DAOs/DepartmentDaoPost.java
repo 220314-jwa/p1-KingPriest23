@@ -28,8 +28,8 @@ public class DepartmentDaoPost implements DepartmentDAO{
         Connection connection = connFactory.getConnection();
 
         // stores sql command that normally goes in DBeaver
-        String deptsql = "insert into Department (employees, deptHead, deptName, status)" +
-                "values (default, ?, ?, ?)";
+        String sql = "insert into Department (dept_id, deptHead, deptName)" +
+                "values (default, ?, ?)";
         // define before try/catch, so it doesn't error below
         PreparedStatement stated;
 
@@ -38,12 +38,11 @@ public class DepartmentDaoPost implements DepartmentDAO{
             // pass in flag "RETURN_GENERATED_KEYS" so id is generated
             // provides a way to retrieve values from columns that are part of an index
             // or have default value assigned
-            stated = connection.prepareStatement(deptsql, PreparedStatement.RETURN_GENERATED_KEYS);
+            stated = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
             // set the fields
+            stated.setInt(1, engineer.getDeptId());
             stated.setString(1, engineer.getDeptHead());
             stated.setString(2, engineer.getDeptName());
-            stated.setInt(3, engineer.getEmployees());
-            stated.setString(4, engineer.getStatus());
 
             // setAutoCommit(false) allows you to group multiple subsequent Statements
             // under the same transaction.
@@ -59,10 +58,25 @@ public class DepartmentDaoPost implements DepartmentDAO{
             	auto.next();
             	int id = auto.getByte(affectedRows);
             	return id;
-            } 
+            } else {
+            	System.out.println("Something went wrong when trying to add a department.");
+            	connection.rollback();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+            try {
+            	connection.rollback();
+            }catch (SQLException e1) {
+            	e1.printStackTrace();
+            }finally {
+            	try {
+            		connection.close();
+            	}catch (SQLException e2) {
+            		e.printStackTrace();
+            	}
+            }
+        } 
+        return engineer.getDeptId();
        
     }
 
@@ -108,8 +122,12 @@ public class DepartmentDaoPost implements DepartmentDAO{
         return dept;
     }
 
-    private Department parseResultSet(ResultSet results) {
-
+    private Department parseResultSet(ResultSet results) throws SQLException {
+    	Department dept = new Department();
+    	dept.setDeptId(results.getInt(1));
+    	dept.setDeptHead(results.getString(2));
+    	dept.setDeptName(results.getString(3));
+    	
         return (Department) results;
     }
 
@@ -122,7 +140,15 @@ public class DepartmentDaoPost implements DepartmentDAO{
             PreparedStatement preparedStatement = connection.prepareStatement(updatedDept);
             preparedStatement.setString(1, updatedObj.getDeptName());
             preparedStatement.setString(2, updatedObj.getDeptHead());
-            preparedStatement.setInt(3, updatedObj.getEmployees());
+            preparedStatement.setInt(3, updatedObj.getDeptId());
+            connection.setAutoCommit(false);
+            // return a count of how many records were updated
+            int rowsUpdated = preparedStatement.executeUpdate();
+            if(rowsUpdated == 1) {
+            	connection.commit();
+            } else {
+            	connection.rollback();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -136,19 +162,36 @@ public class DepartmentDaoPost implements DepartmentDAO{
         String sql = "delete from department where deptId = ?;";
         try{
             PreparedStatement stated = connection.prepareStatement(sql);
-            stated.setInt(1, objToDelete.getEmployees());
-        } catch (SQLException e1) {
-            e1.printStackTrace();
+            stated.setInt(1, objToDelete.getDeptId());
+            connection.setAutoCommit(false); // for ACID (transaction management)
+            int rowsUpdated = stated.executeUpdate();
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
             try {
                 connection.rollback();
-            } catch (SQLException e2) {
-                e2.printStackTrace();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
         }
     }
     @Override
-    public Department getById() {
-        return null;
+    public Department getById(int id) {
+        Department dept = null;
+        Connection conn = connFactory.getConnection();
+        String sql = "select * from department inner join employee on department.deptId=employee.deptId"
+        		+ " where dept.id = ?";
+        try {
+        	PreparedStatement stmt = conn.prepareStatement(sql);
+        	stmt.setInt(1, id);
+        	ResultSet rs = stmt.executeQuery();
+        	if(rs.next()) {
+        	 dept = parseResultSet(rs);
+        	}
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        }
+        return dept;
     }
     @Override
     public Department getByDeptHead(String deptHead) {
@@ -167,27 +210,7 @@ public class DepartmentDaoPost implements DepartmentDAO{
         return depts;
     }
 
-    @Override
-    public Department getByDeptId(int deptId) {
-        Department dept = null;
-        String sql = "select * from department where id=?";
-        try (Connection connection = connFactory.getConnection()){
-            PreparedStatement stated = connection.prepareStatement(sql);
-            stated.setString(1, String.valueOf(deptId));
-            ResultSet results = stated.executeQuery();
-            results.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
-
-	@Override
-	public Department getByStatus(String status) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 
 }

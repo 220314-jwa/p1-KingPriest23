@@ -9,6 +9,7 @@ public class DAOFactory {
  // saves memory
  private static DepartmentDAO deptDao = null;
  private static EmployeeDAO empDao = null;
+ private static RequestDAO reqDao = null;
 
  // make our constructor private, so it can't be accessed publicly
  private DAOFactory() {}
@@ -25,5 +26,11 @@ public class DAOFactory {
          empDao = new EmployeeDaoPost();
      }
     return empDao;
+ }
+ public static RequestDAO getReqDao() {
+	 if (reqDao == null) {
+		 reqDao = new RequestDaoPost();
+	 }
+	 return reqDao;
  }
 }
