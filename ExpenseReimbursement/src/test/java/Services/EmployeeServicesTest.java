@@ -29,16 +29,12 @@ import Exceptions.IncorrectCredentialsException;
 import Exceptions.UsernameAlreadyExistsException;
 
 @ExtendWith(MockitoExtension.class)
-class EmployeeServicesTest {
+public class EmployeeServicesTest {
 	@Mock // says that we want Mockito to create a mock version of this object
 	private EmployeeDAO empDao;
-	@Mock
-	private DepartmentDAO deptDao;
+	
 	@Mock
 	private RequestDAO reqDao;
-	
-//	private static Employee employed = new Employee();
-//	private static Employee manager = new Employee();
 	
 	  // we need a field for the class that we're testing
     @InjectMocks // this is where Mockito needs to inject the mocks
@@ -89,6 +85,8 @@ class EmployeeServicesTest {
     @Test
     public void registerSuccessfully() throws UsernameAlreadyExistsException {
         Employee newEmployee = new Employee();
+        // mock empDao.create(newEmployee)
+        when(empDao.create(newEmployee)).thenReturn(1);
         Employee resultServed = servedEmployee.register(newEmployee);
         // the behavior that I'm looking for is that the method returns
         // the Employee with their newly generated ID, so that I want to

@@ -16,7 +16,7 @@ public interface EmployeeServices {
     public Employee logIn(String username, String password) throws IncorrectCredentialsException;
     public Employee register(Employee newEmployee) throws UsernameAlreadyExistsException;
     public Employee getEmployeeById(int id);
-    
+    public Request getRequestById(int id);
     public List<Request> viewSubmittedRequest();
     public Request getSubmittedByDate(String submittedDate);
     

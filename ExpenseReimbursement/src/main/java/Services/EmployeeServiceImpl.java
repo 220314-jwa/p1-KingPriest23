@@ -88,6 +88,11 @@ public class EmployeeServiceImpl implements EmployeeServices{
 		}
 	}
 
+	@Override
+	public Request getRequestById(int id) {
+		return reqDao.getById(id);
+	}
+
 	
 
 }
