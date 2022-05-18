@@ -35,7 +35,7 @@ public class TRMSHomePage {
 	}
 	
 	public void navigateTo() {
-		driver.get("C:\\Users\\Mami\\P1\\pages html\\index.html");
+		driver.get("C:\\Users\\Mami\\git\\p1-KingPriest23\\FrontEnd\\index.html");
 	}
 	public void inputUsername(String username) {
 		usernameInput.sendKeys(username);
